@@ -9,6 +9,7 @@ const linearR = {
   epochs: 50,
   x_vals: [] as number[],
   y_vals: [] as number[],
+  // TODO: get a random number between -1 and 1
   m: tf.variable(tf.scalar(Math.random())),
   b: tf.variable(tf.scalar(Math.random())),
   loss: (pred: tf.Tensor<tf.Rank>, labels: tf.Tensor1D) =>
@@ -38,6 +39,7 @@ const linearR = {
 
     const lineX = [-1, 1];
     const ys = tf.tidy(() => linearR.predict(lineX));
+    // TODO: use .data() => Promise
     let lineY = ys.dataSync();
     ys.dispose();
     let dataset = chart.data.datasets?.[0];
@@ -59,6 +61,7 @@ const polynomialR = {
   epochs: 100,
   x_vals: [] as number[],
   y_vals: [] as number[],
+  // TODO: get a random number between -1 and 1
   a: tf.variable(tf.scalar(Math.random())),
   b: tf.variable(tf.scalar(Math.random())),
   c: tf.variable(tf.scalar(Math.random())),
@@ -98,6 +101,7 @@ const polynomialR = {
       curveX.push(i);
     }
     const ys = tf.tidy(() => polynomialR.predict(curveX));
+    // TODO: use .data() => Promise
     let curveY = ys.dataSync();
     ys.dispose();
     let dataset = chart.data.datasets?.[1];
