@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --env.development --mode development --open --hot",
     "build": "webpack --env.production --mode production",
+    "start-server": "node server.js",
     "check-types": "tsc"
   },
   "author": "",
@@ -37,6 +38,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^1.7.2",
     "@types/chart.js": "^2.9.19",
-    "chart.js": "^2.9.3"
+    "chart.js": "^2.9.3",
+    "express": "^4.17.1"
   }
 }
