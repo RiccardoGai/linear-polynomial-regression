@@ -4,14 +4,25 @@ import * as tf from '@tensorflow/tfjs';
 
 const MAX_X = 500;
 const MAX_Y = 500;
+const LABEL = {
+  LINEAR: 'Linear',
+  POLYNOMIAL: 'Polynomial',
+  DATA: 'Data'
+};
+
+const getRandomCoefficent = () => {
+  let num = Math.random();
+  num *= Math.floor(num * 2) === 1 ? 1 : -1;
+  return num;
+};
+
 const linearR = {
   optimizer: tf.train.sgd(0.5),
   epochs: 50,
   x_vals: [] as number[],
   y_vals: [] as number[],
-  // TODO: get a random number between -1 and 1
-  m: tf.variable(tf.scalar(Math.random())),
-  b: tf.variable(tf.scalar(Math.random())),
+  m: tf.variable(tf.scalar(getRandomCoefficent())),
+  b: tf.variable(tf.scalar(getRandomCoefficent())),
   loss: (pred: tf.Tensor<tf.Rank>, labels: tf.Tensor1D) =>
     pred.sub(labels).square().mean(),
   predict: (x: number[]) => {
@@ -39,20 +50,20 @@ const linearR = {
 
     const lineX = [-1, 1];
     const ys = tf.tidy(() => linearR.predict(lineX));
-    // TODO: use .data() => Promise
-    let lineY = ys.dataSync();
-    ys.dispose();
-    let dataset = chart.data.datasets?.[0];
-    if (dataset) {
-      dataset.data = [];
-      lineX.forEach((x, i) => {
-        dataset?.data?.push({
-          x: x * MAX_X,
-          y: lineY[i] * MAX_Y
-        } as number & ChartPoint);
-      });
-    }
-    chart.update();
+    ys.data().then((lineY) => {
+      ys.dispose();
+      let dataset = chart.data.datasets?.find((x) => x.label === LABEL.LINEAR);
+      if (dataset) {
+        dataset.data = [];
+        lineX.forEach((x, i) => {
+          dataset?.data?.push({
+            x: x * MAX_X,
+            y: lineY[i] * MAX_Y
+          } as number & ChartPoint);
+        });
+      }
+      chart.update();
+    });
   }
 };
 
@@ -61,11 +72,10 @@ const polynomialR = {
   epochs: 100,
   x_vals: [] as number[],
   y_vals: [] as number[],
-  // TODO: get a random number between -1 and 1
-  a: tf.variable(tf.scalar(Math.random())),
-  b: tf.variable(tf.scalar(Math.random())),
-  c: tf.variable(tf.scalar(Math.random())),
-  d: tf.variable(tf.scalar(Math.random())),
+  a: tf.variable(tf.scalar(getRandomCoefficent())),
+  b: tf.variable(tf.scalar(getRandomCoefficent())),
+  c: tf.variable(tf.scalar(getRandomCoefficent())),
+  d: tf.variable(tf.scalar(getRandomCoefficent())),
   loss: (pred: tf.Tensor<tf.Rank>, labels: tf.Tensor1D) =>
     pred.sub(labels).square().mean(),
   predict: (x: number[]) => {
@@ -101,20 +111,22 @@ const polynomialR = {
       curveX.push(i);
     }
     const ys = tf.tidy(() => polynomialR.predict(curveX));
-    // TODO: use .data() => Promise
-    let curveY = ys.dataSync();
-    ys.dispose();
-    let dataset = chart.data.datasets?.[1];
-    if (dataset) {
-      dataset.data = [];
-      curveX.forEach((x, i) => {
-        dataset?.data?.push({
-          x: x * MAX_X,
-          y: curveY[i] * MAX_Y
-        } as number & ChartPoint);
-      });
-    }
-    chart.update();
+    ys.data().then((curveY) => {
+      ys.dispose();
+      let dataset = chart.data.datasets?.find(
+        (x) => x.label === LABEL.POLYNOMIAL
+      );
+      if (dataset) {
+        dataset.data = [];
+        curveX.forEach((x, i) => {
+          dataset?.data?.push({
+            x: x * MAX_X,
+            y: curveY[i] * MAX_Y
+          } as number & ChartPoint);
+        });
+      }
+      chart.update();
+    });
   }
 };
 
@@ -131,25 +143,25 @@ const chart = new Chart(cvs, {
         backgroundColor: 'transparent',
         pointBorderColor: 'transparent',
         pointBackgroundColor: 'transparent',
-        borderColor: 'blue',
+        borderColor: '#2E5077',
         type: 'line',
-        label: 'Linear'
+        label: LABEL.LINEAR
       },
       {
         data: [],
         backgroundColor: 'transparent',
         pointBorderColor: 'transparent',
         pointBackgroundColor: 'transparent',
-        borderColor: 'red',
+        borderColor: '#C5283D',
         type: 'line',
-        label: 'Polynomial'
+        label: LABEL.POLYNOMIAL
       },
       {
         data: [],
         pointBorderColor: '#000',
         pointBackgroundColor: '#000',
         type: 'scatter',
-        label: 'Data'
+        label: LABEL.DATA
       }
     ]
   },
@@ -168,14 +180,13 @@ const chart = new Chart(cvs, {
           }
         }
       }
-      const scatterData = chart.data.datasets?.find(
-        (x) => x.type === 'scatter'
-      );
+      const dataset = chart.data.datasets?.find((x) => x.label === LABEL.DATA);
 
-      scatterData?.data?.push({
+      dataset?.data?.push({
         x: valueX,
         y: valueY
       } as number & ChartPoint);
+      chart.update();
 
       linearR.draw(valueX, valueY);
       polynomialR.draw(valueX, valueY);
