@@ -38,7 +38,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^1.7.2",
     "@types/chart.js": "^2.9.19",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "express": "^4.17.1"
   }
 }
